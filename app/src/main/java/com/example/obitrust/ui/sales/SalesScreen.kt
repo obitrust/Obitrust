@@ -223,6 +223,8 @@ fun SalesScreen(
             storePhone = profile?.phone ?: "+233 24 123 4567",
             storeAddress = profile?.address ?: "Accra Central, Ghana",
             receiptFooter = profile?.receiptFooter ?: "Thank you for doing business with OBITRUST.",
+            logoUri = profile?.logoUri,
+            selectedLogoPreset = profile?.selectedLogoPreset,
             onDismiss = { selectedSaleForReceipt = null }
         )
     }

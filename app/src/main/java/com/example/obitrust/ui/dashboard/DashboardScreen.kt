@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.example.obitrust.data.accounting.AccountingEngine
 import com.example.obitrust.ui.BusinessViewModel
 import com.example.obitrust.ui.NavigationScreen
+import com.example.obitrust.ui.components.BusinessLogo
 import com.example.obitrust.ui.components.MetricCard
 import com.example.obitrust.ui.components.SectionHeader
 import com.example.obitrust.ui.components.SimpleBarChart
@@ -128,20 +129,12 @@ fun DashboardScreen(
                     modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(GoldPrimary.copy(alpha = 0.2f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AccountBalance,
-                            contentDescription = null,
-                            tint = GoldPrimary,
-                            modifier = Modifier.size(26.dp)
-                        )
-                    }
+                    BusinessLogo(
+                        logoUri = profile?.logoUri,
+                        selectedPreset = profile?.selectedLogoPreset ?: "SHIELD",
+                        size = 48.dp,
+                        modifier = Modifier.testTag("dashboard_business_logo")
+                    )
                     Spacer(modifier = Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(

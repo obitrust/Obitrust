@@ -445,6 +445,55 @@ class BusinessViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    fun updateBusinessLogoFromUri(context: android.content.Context, uri: android.net.Uri, onSuccess: () -> Unit) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val logoFile = java.io.File(context.filesDir, "business_logo.png")
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    logoFile.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                val current = businessProfile.value ?: BusinessProfileEntity()
+                val updated = current.copy(logoUri = logoFile.absolutePath)
+                repository.saveProfile(updated)
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    onSuccess()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun updateLogoPreset(preset: String, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            val current = businessProfile.value ?: BusinessProfileEntity()
+            val updated = current.copy(selectedLogoPreset = preset)
+            repository.saveProfile(updated)
+            onSuccess()
+        }
+    }
+
+    fun removeCustomLogo(context: android.content.Context, onSuccess: () -> Unit) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val logoFile = java.io.File(context.filesDir, "business_logo.png")
+                if (logoFile.exists()) {
+                    logoFile.delete()
+                }
+                val current = businessProfile.value ?: BusinessProfileEntity()
+                val updated = current.copy(logoUri = "")
+                repository.saveProfile(updated)
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                    onSuccess()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun updateEBook(ebook: EBookEntity) {
         viewModelScope.launch {
             repository.updateEBook(ebook)

@@ -308,6 +308,8 @@ fun ReceiptDialog(
     storePhone: String = "+233 24 123 4567",
     storeAddress: String = "Plot 14, Commercial Avenue, Accra",
     receiptFooter: String = "Thank you for shopping with OBITRUST.",
+    logoUri: String? = null,
+    selectedLogoPreset: String? = "SHIELD",
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -363,17 +365,25 @@ fun ReceiptDialog(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = Icons.Default.ReceiptLong,
-                    contentDescription = null,
-                    tint = GoldPrimary,
-                    modifier = Modifier.size(44.dp)
+                BusinessLogo(
+                    logoUri = logoUri,
+                    selectedPreset = selectedLogoPreset,
+                    size = 52.dp,
+                    showBorder = true,
+                    borderColor = GoldPrimary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
+                    text = storeName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = GoldPrimary,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                Text(
                     text = "Official Sales Receipt",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
                 )
                 Text(
                     text = "#${sale.saleNumber}",

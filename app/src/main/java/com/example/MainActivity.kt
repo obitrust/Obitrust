@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.obitrust.ui.BusinessViewModel
+import com.example.obitrust.ui.components.BusinessLogo
 import com.example.obitrust.ui.NavigationScreen
 import com.example.obitrust.ui.accounting.AccountingScreen
 import com.example.obitrust.ui.accounts.AccountsScreen
@@ -90,7 +91,7 @@ fun ObiTrustApp(viewModel: BusinessViewModel) {
                     drawerContentColor = Color.White,
                     modifier = Modifier.width(300.dp).testTag("navigation_drawer")
                 ) {
-                    DrawerHeader(businessName = profile?.businessName ?: "OBITRUST BUSINESS MANAGER")
+                    DrawerHeader(profile = profile)
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = NavyBorder)
 
                     LazyColumn(
@@ -271,26 +272,18 @@ fun ObiTrustApp(viewModel: BusinessViewModel) {
 }
 
 @Composable
-private fun DrawerHeader(businessName: String) {
+private fun DrawerHeader(profile: com.example.obitrust.data.model.BusinessProfileEntity?) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 24.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(54.dp)
-                .clip(CircleShape)
-                .background(GoldPrimary),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Shield,
-                contentDescription = null,
-                tint = NavyDark,
-                modifier = Modifier.size(32.dp)
-            )
-        }
+        BusinessLogo(
+            logoUri = profile?.logoUri,
+            selectedPreset = profile?.selectedLogoPreset ?: "SHIELD",
+            size = 56.dp,
+            modifier = Modifier.testTag("drawer_business_logo")
+        )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = "OBITRUST",
@@ -307,7 +300,7 @@ private fun DrawerHeader(businessName: String) {
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = businessName,
+            text = profile?.businessName ?: "OBITRUST BUSINESS MANAGER",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

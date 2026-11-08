@@ -22,8 +22,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import com.example.obitrust.data.model.BusinessProfileEntity
 import com.example.obitrust.ui.BusinessViewModel
+import com.example.obitrust.ui.components.BusinessLogo
+import com.example.obitrust.ui.components.LogoPresets
 import com.example.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,6 +60,17 @@ fun SettingsScreen(
 
     val roles = listOf("Admin", "Manager", "Cashier", "Accountant", "Inventory Officer")
 
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri ->
+            if (uri != null) {
+                viewModel.updateBusinessLogoFromUri(context, uri) {
+                    Toast.makeText(context, "Logo updated successfully!", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    )
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -62,7 +80,131 @@ fun SettingsScreen(
     ) {
         item {
             Text("Settings & Business Configuration", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Text("Manage Ghana localized tax settings, security PIN, and store profile", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("Manage your logo branding, Ghana tax rates, security PIN, and store profile", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+
+        // Business Brand Logo Customization Card
+        item {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = NavySurface),
+                border = CardDefaults.outlinedCardBorder().copy(brush = androidx.compose.ui.graphics.SolidColor(NavyBorder)),
+                modifier = Modifier.fillMaxWidth().testTag("brand_logo_card")
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        BusinessLogo(
+                            logoUri = profile?.logoUri,
+                            selectedPreset = profile?.selectedLogoPreset ?: "SHIELD",
+                            size = 64.dp,
+                            modifier = Modifier.testTag("current_business_logo_preview")
+                        )
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "Business Logo & Branding",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = androidx.compose.ui.graphics.Color.White
+                            )
+                            val hasCustom = !profile?.logoUri.isNullOrBlank() && java.io.File(profile?.logoUri ?: "").exists()
+                            if (hasCustom) {
+                                Badge(
+                                    containerColor = EmeraldProfit.copy(alpha = 0.2f),
+                                    contentColor = EmeraldProfit,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                ) {
+                                    Text("Custom Photo Active", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                }
+                            } else {
+                                Text(
+                                    "Emblem: ${profile?.selectedLogoPreset ?: "SHIELD"}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = GoldPrimary
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Button(
+                            onClick = {
+                                photoPickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = GoldPrimary),
+                            modifier = Modifier.weight(1f).testTag("upload_logo_button")
+                        ) {
+                            Icon(Icons.Default.AddPhotoAlternate, contentDescription = null, tint = NavyDark, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Upload Your Logo", color = NavyDark, fontWeight = FontWeight.Bold)
+                        }
+
+                        if (!profile?.logoUri.isNullOrBlank()) {
+                            OutlinedButton(
+                                onClick = {
+                                    viewModel.removeCustomLogo(context) {
+                                        Toast.makeText(context, "Custom logo removed", Toast.LENGTH_SHORT).show()
+                                    }
+                                },
+                                modifier = Modifier.testTag("remove_logo_button")
+                            ) {
+                                Icon(Icons.Default.DeleteOutline, contentDescription = null, tint = CrimsonExpense, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Remove", color = CrimsonExpense)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        "Or Choose an Executive Brand Emblem Preset:",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(LogoPresets.presets) { (presetKey, pair) ->
+                            val isSelected = (profile?.selectedLogoPreset ?: "SHIELD").equals(presetKey, ignoreCase = true)
+                            FilterChip(
+                                selected = isSelected,
+                                onClick = {
+                                    viewModel.updateLogoPreset(presetKey) {
+                                        Toast.makeText(context, "Brand emblem set to ${pair.first}", Toast.LENGTH_SHORT).show()
+                                    }
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = pair.second,
+                                        contentDescription = null,
+                                        tint = if (isSelected) NavyDark else GoldPrimary,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                },
+                                label = { Text(pair.first, fontSize = 11.sp) },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = GoldPrimary,
+                                    selectedLabelColor = NavyDark
+                                ),
+                                modifier = Modifier.testTag("preset_logo_$presetKey")
+                            )
+                        }
+                    }
+                }
+            }
         }
 
         // Active Role Card
@@ -276,7 +418,9 @@ fun SettingsScreen(
                         receiptFooter = profile?.receiptFooter ?: "Thank you for shopping with OBITRUST.",
                         pinCode = pinCode,
                         isPinRequired = pinRequired,
-                        activeUserRole = selectedRole
+                        activeUserRole = selectedRole,
+                        logoUri = profile?.logoUri ?: "",
+                        selectedLogoPreset = profile?.selectedLogoPreset ?: "SHIELD"
                     )
                     viewModel.saveProfile(updated) {
                         Toast.makeText(context, "Business settings updated successfully!", Toast.LENGTH_SHORT).show()

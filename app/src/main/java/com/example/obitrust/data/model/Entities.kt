@@ -255,5 +255,7 @@ data class BusinessProfileEntity(
     val receiptFooter: String = "Thank you for doing business with OBITRUST. Items sold in good condition are not returnable after 48 hours.",
     val pinCode: String = "1234",
     val isPinRequired: Boolean = false,
-    val activeUserRole: String = "Admin"
+    val activeUserRole: String = "Admin",
+    val logoUri: String = "",
+    val selectedLogoPreset: String = "SHIELD"
 )
