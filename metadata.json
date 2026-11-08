@@ -1,0 +1,6 @@
+{
+  "name": "Obitrust Business Manager",
+  "description": "Complete business management, sales POS, inventory, double-entry bookkeeping, Ghana localization and accounting system.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
